@@ -1,0 +1,25 @@
+[package]
+name                                    =   "procrastinate"
+description                             =   "Helps getting things done with ToDo-Lists, Calendar, Bucket-Lists, … and some gamification."
+version                                 =   "0.1.0"
+authors                                 =   [
+                                              "Sebastian Walz <sivizius@ohai.su>",
+                                            ]
+edition                                 =   "2018"
+license                                 =   "MIT"
+repository                              =   "https://github.com/sivizius/procrastinate"
+
+[dependencies]
+async-std                               =   "1.4"
+typed-html                              =   "0.2"
+
+[lib]
+path                                    =   "source/lib.rs"
+
+[[bin]]
+name                                    =   "service"
+path                                    =   "source/service.rs"
+
+[[bin]]
+name                                    =   "cli"
+path                                    =   "source/cli.rs"
