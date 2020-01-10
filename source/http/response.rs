@@ -6,14 +6,6 @@ use
     status::Status,
     version::Version,
   },
-  std::
-  {
-    fmt::
-    {
-      self,
-      Display,
-    },
-  },
 };
 
 /// …
@@ -22,7 +14,7 @@ pub struct    Response
   pub version:                          Version,
   pub status:                           Status,
   pub header:                           Vec < KeyValuePair  >,
-  pub content:                          String,
+    pub content:                        Vec < u8            >,
 }
 
 /// Constructor for `Response` …
@@ -40,12 +32,49 @@ pub fn  Response
     version:                            Version::HTTP_10,
     status:                             Status::Ok,
     header:                             Vec::new(),
-    content:                            "".to_owned(),
+    content:                            Vec::new(),
   }
 }
 
 impl          Response
 {
+  /// Consumes `Response` and converts it to `Vec<u8>`.
+  pub fn        into_vector
+  (
+    mut self,
+  )
+  ->  Vec < u8  >
+  {
+    let mut buffer:         Vec < u8  > =   Vec::new();
+    let mut header
+    =   format!
+        (
+          "{} {}\r\n{}\r\n",
+          self.version,
+          self.status,
+          {
+            let mut result              =   "".to_owned ( );
+            for pair                    in  &self.header
+            {
+              result
+                .push_str
+                (
+                  &format!
+                  (
+                    "{}: {}\r\n",
+                    pair.key,
+                    pair.value,
+                  )
+                );
+            }
+            result
+          },
+        ).into_bytes  ( );
+    buffer.append           ( &mut header       );
+    buffer.append           ( &mut self.content );
+    buffer
+  }
+
   /// Add a `header`-value to `Response` in an OOP-Style.
   ///
   /// # Arguments
@@ -109,13 +138,19 @@ impl          Response
   pub fn        content
   (
     mut self,
-    content:                            String,
+    contentType:                        &'static str,
+    contentBody:                        Vec < u8  >,
   )
   ->  Self
   {
-    let     length                      =   &content.len  ( );
-    self.content                        =   content;
+    let     length                      =   contentBody.len ( );
+    self.content                        =   contentBody;
     self
+      .addHeader
+      (
+        "Content-Type".to_owned(),
+        contentType.to_owned(),
+      )
       .addHeader
       (
         "Content-Length".to_owned(),
@@ -124,46 +159,6 @@ impl          Response
           "{}",
           length,
         ),
-      )
-  }
-}
-
-impl          Display                   for Response
-{
-  fn fmt
-  (
-    &self,
-    formatter:                          &mut fmt::Formatter<'_>
-  )
-  ->  fmt::Result
-  {
-    formatter
-      .write_str
-      (
-        &format!
-        (
-          "{} {}\r\n{}\r\n{}",
-          self.version,
-          self.status,
-          {
-            let mut result                      =   "".to_owned ( );
-            for pair                            in  &self.header
-            {
-              result
-                .push_str
-                (
-                  &format!
-                  (
-                    "{}: {}\r\n",
-                    pair.key,
-                    pair.value,
-                  )
-                );
-            }
-            result
-          },
-          self.content,
-        )
       )
   }
 }

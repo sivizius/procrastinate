@@ -7,30 +7,32 @@ use
       request::Request,
       response::Response,
       status::Status,
-      version::Version,
     },
   },
   async_std::
   {
-    net::
+    sync::
     {
-      TcpListener,
-      ToSocketAddrs,
+      Arc,
     },
-    prelude::*,
-    task,
   },
-  std::
+  indoc::
   {
-    io::
-    {
-      Error,
-    },
+    indoc,
   },
+  procrastinator::
+  {
+    Procrastinator,
+  },
+  /*serde_json::
+  {
+
+  },*/
   typed_html::
   {
     html,
     text,
+    unsafe_text,
     dom::
     {
       DOMTree,
@@ -38,161 +40,195 @@ use
   },
 };
 
-/// Handle Hypter Text Transfer Protocol Requests.
-///
-/// # Arguments
-/// * `request`                         – the actual request.
-async fn      handleHTTPrequest
-(
-  request:                              Request,
-)
-->  Result
-    <
-      Response,
-      String,
-    >
-{
-  let mut content: DOMTree  < String  >
-  =   html!
-      (
-        <html>
-          <head>
-            <title>"Procrastinate"</title>
-          </head>
-          <body>
-            <h1>"Hello World!"</h1>
-            <p>
-            {
-              text!
-              (
-                "Path: {}",
-                request.path
-              )
-            }
-            </p>
-            <ul>
-            {
-              request
-                .query
-                .iter()
-                .map
-                (
-                  | entry |
-                  html!
-                  (
-                    <li>
-                    {
-                      text!
-                      (
-                        "{}={}",
-                        entry.key,
-                        entry.value
-                      )
-                    }
-                    </li>
-                  )
-                )
-            }
-            </ul>
-          </body>
-        </html>
-      );
-  Ok
-  (
-    Response()
-      .version    ( Version::HTTP_10      )
-      .status     ( Status::Ok            )
-      .addHeader
-      (
-        "Content-Type".to_owned(),
-        "text/html".to_owned(),
-      )
-      .content    ( content.to_string ( ) )
-  )
-}
-
 /// …
 ///
 /// # Arguments
 /// * `` –
-pub fn          webServer
-<
-  Address,
->
+fn            frontend                  < Closure >
 (
-  address:                              Address,
+  request:                              &Request,
+  title:                                String,
+  body:                                 Closure,
 )
-->  Result
-    <
-      (),
-      Error,
-    >
+->  Vec < u8  >
 where
-  Address:                              ToSocketAddrs,
+  Closure:                              FnOnce  ( &Request ) ->  String,
 {
-  task::block_on
-  (
-    async
-    {
-      let     socket                    =   TcpListener::bind ( address ).await?;
-      println!("Waiting for connections");
-      loop
-      {
-        let
-        (
-          mut stream,
-          address
-        )
-        =   socket
-              .accept()
-              .await
-              .unwrap();
-        task::spawn
-        (
-          async move
-          {
-            match Request().parse
-                  (
-                    &mut stream,
-                  ).await
+  let     document:                     DOMTree  < String  >
+  =   html!
+      (
+        <html>
+          <head>
+            <title>
             {
-              Ok  ( request )
-              =>  match handleHTTPrequest ( request ).await
-                  {
-                    Ok  ( response  )
-                    =>  match
-                          match {
-                                  let     response
-                                  =   format!
-                                      (
-                                        "{}",
-                                        response,
-                                      );
-                                  //println!  ( "{}", response  );
-                                  stream
-                                  .write  ( response.as_bytes ( ) )
-                                  .await
-                                }
-                          {
-                            Ok    ( _     )
-                            =>  stream
-                                  .flush().await,
-                            Err   ( error )
-                            =>  Err ( error ),
-                          }
-                        {
-                          Ok  ( _       ) =>  println!  ( "Success! {}",    address ),
-                          Err ( message ) =>  eprintln! ( "Send Fail: {}",  message ),
-                        },
-                    Err ( message   )
-                    =>  eprintln! ( "Ouput Fail: {}", message ),
-                  },
-              Err ( message )
-              =>  eprintln! ( "Input Fail: {}", message ),
+              text!
+              (
+                "Procrastinator – {}",
+                title
+              )
             }
-          }
-        );
-      }
-    }
+            </title>
+            <link rel="stylesheet" href="common.css" />
+            <meta charset="utf-8" />
+          </head>
+          <body>
+            <div class="frontend">
+              <div class="head">
+                <img class="logo" src="logo.png" />
+                "Procrastinator"
+              </div>
+              <div class="menu">"Navigation"</div>
+              <div class="body">
+              {
+                unsafe_text!
+                (
+                  body(&request)
+                )
+              }
+              </div>
+              <div class="foot">
+                "Project by _sivizius – "
+                <a href="https://github.com/sivizius/procrastinator">"Procrastinator on GitHub"</a>
+                " – 2020"
+              </div>
+            </div>
+          </body>
+        </html>
+      );
+  document
+    .to_string        ( )
+    .into_bytes       ( )
+}
+
+/// Handle Hypter Text Transfer Protocol Requests.
+///
+/// # Arguments
+/// * `request`                         – the actual request.
+pub fn        handleHTTPrequest
+(
+  request:                              Request,
+  _procrastinator:                       Arc < Procrastinator  >,
+)
+->  Response
+{
+  let
+  (
+    contentCode,
+    contentType,
+    contentBody,
   )
+  =   match request
+              .path
+              .as_str()
+      {
+        | "/favicon.ico"
+        | "/logo.png"
+        =>  (
+              Status::Ok,
+              "image/png",
+              include_bytes!  ( "assets/sba.png" )
+                .to_vec(),
+            ),
+        | "/common.css"
+        =>  (
+              Status::Ok,
+              "text/css",
+              indoc!
+              ("
+                body
+                {
+                  background:           #000;
+                  color:                #f80;
+                }
+                .logo
+                {
+                  height:               48px;
+                }
+                .head
+                {
+                  grid-area:            head;
+                  font-size:            48px;
+                }
+                .menu
+                {
+                  grid-area:            menu;
+                }
+                .body
+                {
+                  grid-area:            body;
+                }
+                .foot
+                {
+                  grid-area:            foot;
+                  align:                center;
+                }
+                .frontend
+                {
+                  display:              grid;
+                  grid-template-areas:
+                    'head head head head head head'
+                    'menu body body body body body'
+                    'foot foot foot foot foot foot';
+                  grid-gap:             2px;
+                  grid-template-rows:   auto 1fr auto;
+                  height:               100%;
+                  background:           #f80;
+                }
+                .frontend > div
+                {
+                  background:           #000;
+                  padding:              2px 0;
+                }
+              ")
+                .as_bytes ( )
+                .to_vec   ( ),
+            ),
+        | "/"
+        | "/index"
+        =>  (
+              Status::Ok,
+              "text/html",
+              frontend
+              (
+                &request,
+                "Hello World!".to_owned(),
+                | _ |
+                {
+                  let     document:     DOMTree  < String  >
+                  =   html!
+                      (
+                        <h1>"Hello World"</h1>
+                      );
+                  document.to_string()
+                },
+              ),
+            ),
+        _
+        =>  (
+              Status::NotFound,
+              "text/html",
+              frontend
+              (
+                &request,
+                "Not Found *shrug*".to_owned(),
+                | _ |
+                {
+                  let     document:     DOMTree  < String  >
+                  =   html!
+                      (
+                        <h1>"404 – Not Found"</h1>
+                      );
+                  document.to_string()
+                },
+              ),
+            ),
+      };
+  Response()
+    .version    ( request.version )
+    .status     ( contentCode     )
+    .content
+    (
+      contentType,
+      contentBody,
+    )
 }
