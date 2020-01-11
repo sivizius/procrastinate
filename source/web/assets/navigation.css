@@ -1,0 +1,27 @@
+.navItemInner
+{
+  font-size:                            20px;
+  list-style-position:                  inside;
+  margin:                               0px 4px 4px 4px;
+}
+
+.navItemInner > img
+{
+  height:                               20px;
+}
+
+.navItemOuter > a
+{
+  color:                                #f80;
+  text-decoration:                      none;
+}
+
+.navItemOuter:hover
+{
+  background:                           rgba(255, 127, 0, 0.4);
+}
+
+.navList
+{
+  padding:                              0px;
+}

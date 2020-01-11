@@ -9,6 +9,9 @@
 #![warn(missing_docs)]
 #![warn(future_incompatible)]
 
+/// The actual library, the other files in `source/` are for executables.
+pub mod this;
+
 use
 {
   serde::
@@ -33,124 +36,38 @@ use
       SystemTime,
     },
   },
-};
-
-/// Proof of work.
-#[derive( Deserialize,  Serialize )]
-pub enum      Proof
-{
-  /// Just trust, that this `Task` was done at the given `time`.
-  Trust
+  this::
   {
-    /// This `Task` was allegedly done at this time.
-    time:                               SystemTime,
+    control::
+    {
+      Registration,
+    },
+    credit::
+    {
+      Credit,
+      Points,
+    },
+    proof::
+    {
+      Proof,
+    },
+    tasks::
+    {
+      Deadline,
+      Task,
+      TaskID,
+    },
+    teams::
+    {
+      Team,
+    },
+    users::
+    {
+      User,
+      UserID,
+    },
   },
-}
-
-/// What you get for achieving this `Task`.
-#[derive( Deserialize,  Serialize )]
-pub struct    Credit                    ( Points  );
-
-/// Stored points for everything so far.
-#[derive( Deserialize,  Serialize )]
-pub struct    Points                    ( usize );
-
-/// Token to reference and access a `Task` in the `listOfTasks`.
-#[derive( Deserialize,  Serialize )]
-pub struct    TaskID                    ( usize );
-
-/// Token to reference and access a `User` in the `listOfUsers`
-#[derive( Deserialize,  Serialize )]
-pub struct    UserID                    ( usize );
-
-/// Token to reference and access a `Team` in the `listOfTeams`
-#[derive( Deserialize,  Serialize )]
-pub struct    TeamID                    ( usize );
-
-/// Different types of achievements.
-#[derive( Deserialize,  Serialize )]
-pub enum      AchievementType
-{
-}
-
-/// Data about an achievement a user might earn.
-#[derive( Deserialize,  Serialize )]
-pub struct    Achievement
-{
-  time:                                 SystemTime,
-  this:                                 AchievementType,
-}
-
-/// Data about a single team stored in the `listOfTeams`.
-#[derive( Deserialize,  Serialize )]
-pub struct    Team
-{
-  name:                                 String,
-  points:                               Points,
-  achievements:                         Vec < Achievement >,
-}
-
-/// Data about a single user stored in the `listOfUsers`.
-#[derive( Deserialize,  Serialize )]
-pub struct    User
-{
-  name:                                 String,
-  points:                               Points,
-  achievements:                         Vec < Achievement >,
-}
-
-impl          User
-{
-  /// …
-  ///
-  /// # Arguments
-  /// * `` –
-  pub fn        earnCredit
-  (
-    &mut self,
-    _credit:                            Credit,
-  )
-  ->  Self
-  {
-    unimplemented!()
-  }
-}
-
-/// Data about registration of `Task`.
-#[derive( Deserialize,  Serialize )]
-pub struct    Registration
-{
-  byUser:                               UserID,
-  time:                                 SystemTime,
-}
-
-/// Data about assignment of `Task`.
-#[derive( Deserialize,  Serialize )]
-pub struct    Assignment
-{
-  byUser:                               UserID,
-  toTeam:                               TeamID,
-  time:                                 SystemTime,
-}
-
-/// Data about deadline of `Task`.
-#[derive( Deserialize,  Serialize )]
-pub struct    Deadline
-{
-  earlyBird:                            ( Credit, SystemTime, ),
-  finalBird:                            ( Credit, SystemTime, ),
-  usualBird:                            Credit,
-}
-
-/// Data of a single task in the `listOfTasks`.
-#[derive( Deserialize,  Serialize )]
-pub struct    Task
-{
-  registed:                             Registration,
-  assignment:                           Vec     < Assignment  >,
-  deadline:                             Deadline,
-  proof:                                Option  < Proof       >,
-}
+};
 
 /// Procrastinator
 #[derive( Deserialize,  Serialize )]
@@ -244,6 +161,59 @@ pub fn        Procrastinator  ()
 
 impl          Procrastinator
 {
+  /// …
+  ///
+  /// # Arguments
+  /// * `` –
+  pub fn        registerTask
+  (
+    mut self,
+    title:                              String,
+    description:                        String,
+    byUser:                             UserID,
+  )
+  ->  Self
+  {
+    let     now                         =   SystemTime::now();
+    let     credit
+    =   Credit
+        (
+          Points
+          (
+            1337
+          )
+        );
+    self
+      .listOfTasks
+      .push
+      (
+        Some
+        (
+          Task
+          {
+            title,
+            description,
+            registration:
+              Registration
+              {
+                byUser,
+                time:                     now,
+              },
+            assignment:                   Vec::new(),
+            deadline:
+              Deadline
+              {
+                earlyBird:              ( credit.clone(), now, ),
+                finalBird:              ( credit.clone(), now, ),
+                usualBird:              credit,
+              },
+            proof:                      None,
+          }
+        )
+      );
+    self
+  }
+
   /// Resets all `Points` and `Achievement`s of every `Team` and `User` to an previous state or zero and recalculate them.
   ///
   /// # Arguments

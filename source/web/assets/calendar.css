@@ -1,0 +1,97 @@
+.calNext
+{
+  grid-area:                            calNext;
+}
+
+.calPrev
+{
+  grid-area:                            calPrev;
+}
+
+.calThis
+{
+  font-size:                            32px;
+  font-weight:                          bold;
+  grid-area:                            calThis;
+}
+
+.calTitle
+{
+  font-weight:                          bold;
+}
+
+.calendar
+{
+  background:                           #0f0;
+  display:                              grid;
+  grid-gap:                             2px;
+  grid-template-areas:
+    'calPrev calThis calThis calThis calThis calThis calNext'
+    'calTMon calTTue calTWed calTThu calTFri calTSat calTSun'
+    'cal0Mon cal0Tue cal0Wed cal0Thu cal0Fri cal0Sat cal0Sun'
+    'cal1Mon cal1Tue cal1Wed cal1Thu cal1Fri cal1Sat cal1Sun'
+    'cal2Mon cal2Tue cal2Wed cal2Thu cal2Fri cal2Sat cal2Sun'
+    'cal3Mon cal3Tue cal3Wed cal3Thu cal3Fri cal3Sat cal3Sun'
+    'cal4Mon cal4Tue cal4Wed cal4Thu cal4Fri cal4Sat cal4Sun'
+    'cal5Mon cal5Tue cal5Wed cal5Thu cal5Fri cal5Sat cal5Sun';
+  grid-template-columns:                repeat(7, 1fr);
+  grid-template-rows:                   48px 24px repeat(6,4fr);
+  height:                               100%;
+}
+
+.calendar > div
+{
+  background:                           #000;
+  color:                                #0f0;
+  text-align:                           center;
+}
+
+.calTMon  { grid-area:  calTMon;  }
+.calTTue  { grid-area:  calTTue;  }
+.calTWed  { grid-area:  calTWed;  }
+.calTThu  { grid-area:  calTThu;  }
+.calTFri  { grid-area:  calTFri;  }
+.calTSat  { grid-area:  calTSat;  }
+.calTSun  { grid-area:  calTSun;  }
+.cal0Mon  { grid-area:  cal0Mon;  }
+.cal0Tue  { grid-area:  cal0Tue;  }
+.cal0Wed  { grid-area:  cal0Wed;  }
+.cal0Thu  { grid-area:  cal0Thu;  }
+.cal0Fri  { grid-area:  cal0Fri;  }
+.cal0Sat  { grid-area:  cal0Sat;  }
+.cal0Sun  { grid-area:  cal0Sun;  }
+.cal1Mon  { grid-area:  cal1Mon;  }
+.cal1Tue  { grid-area:  cal1Tue;  }
+.cal1Wed  { grid-area:  cal1Wed;  }
+.cal1Thu  { grid-area:  cal1Thu;  }
+.cal1Fri  { grid-area:  cal1Fri;  }
+.cal1Sat  { grid-area:  cal1Sat;  }
+.cal1Sun  { grid-area:  cal1Sun;  }
+.cal2Mon  { grid-area:  cal2Mon;  }
+.cal2Tue  { grid-area:  cal2Tue;  }
+.cal2Wed  { grid-area:  cal2Wed;  }
+.cal2Thu  { grid-area:  cal2Thu;  }
+.cal2Fri  { grid-area:  cal2Fri;  }
+.cal2Sat  { grid-area:  cal2Sat;  }
+.cal2Sun  { grid-area:  cal2Sun;  }
+.cal3Mon  { grid-area:  cal3Mon;  }
+.cal3Tue  { grid-area:  cal3Tue;  }
+.cal3Wed  { grid-area:  cal3Wed;  }
+.cal3Thu  { grid-area:  cal3Thu;  }
+.cal3Fri  { grid-area:  cal3Fri;  }
+.cal3Sat  { grid-area:  cal3Sat;  }
+.cal3Sun  { grid-area:  cal3Sun;  }
+.cal4Mon  { grid-area:  cal4Mon;  }
+.cal4Tue  { grid-area:  cal4Tue;  }
+.cal4Wed  { grid-area:  cal4Wed;  }
+.cal4Thu  { grid-area:  cal4Thu;  }
+.cal4Fri  { grid-area:  cal4Fri;  }
+.cal4Sat  { grid-area:  cal4Sat;  }
+.cal4Sun  { grid-area:  cal4Sun;  }
+.cal5Mon  { grid-area:  cal5Mon;  }
+.cal5Tue  { grid-area:  cal5Tue;  }
+.cal5Wed  { grid-area:  cal5Wed;  }
+.cal5Thu  { grid-area:  cal5Thu;  }
+.cal5Fri  { grid-area:  cal5Fri;  }
+.cal5Sat  { grid-area:  cal5Sat;  }
+.cal5Sun  { grid-area:  cal5Sun;  }

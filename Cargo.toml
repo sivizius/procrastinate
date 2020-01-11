@@ -11,7 +11,7 @@ repository                              =   "https://github.com/sivizius/procras
 
 [dependencies]
 async-std                               =   "1.4"
-indoc                                   =   "0.3"
+http-async                              =   "0.1"
 ron                                     =   "0.5"
 serde                                   =   "1.0"
 serde_json                              =   "1.0"
@@ -23,7 +23,9 @@ path                                    =   "source/lib.rs"
 [[bin]]
 name                                    =   "service"
 path                                    =   "source/service.rs"
+doc                                     =   true
 
 [[bin]]
 name                                    =   "cli"
 path                                    =   "source/cli.rs"
+doc                                     =   false

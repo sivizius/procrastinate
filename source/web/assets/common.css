@@ -1,0 +1,58 @@
+body
+{
+  background:                           #000;
+  color:                                #f80;
+}
+
+.body
+{
+  grid-area:                            body;
+}
+
+.foot
+{
+  grid-area:                            foot;
+  text-align:                            center;
+}
+
+.frontend
+{
+  background:                           #f80;
+  display:                              grid;
+  grid-gap:                             2px;
+  grid-template-areas:
+    'head head'
+    'menu body'
+    'foot foot';
+  grid-template-columns:                1fr 7fr;
+  grid-template-rows:                   auto 1fr auto;
+  height:                               100%;
+}
+
+.frontend > div
+{
+  background:                           #000;
+  padding:                              2px 0;
+}
+
+.head
+{
+  font-size:                            48px;
+  grid-area:                            head;
+}
+
+.head > a
+{
+  color:                                #f80;
+  text-decoration:                      none;
+}
+
+.logo
+{
+  height:                               32px;
+}
+
+.menu
+{
+  grid-area:                            menu;
+}

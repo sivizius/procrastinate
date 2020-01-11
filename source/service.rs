@@ -9,9 +9,9 @@
 #![warn(missing_docs)]
 #![warn(future_incompatible)]
 
-#![recursion_limit="256"]
+#![recursion_limit="1024"]
 
-mod     http;
+/// The Web Interface.
 mod     web;
 
 use
@@ -36,6 +36,17 @@ use
   {
     loadProcrastinatorConfigFromFile,
     Procrastinator,
+    this::
+    {
+      users::
+      {
+        UserID,
+      },
+    },
+  },
+  web::
+  {
+    WebInterface,
   },
 };
 
@@ -45,7 +56,7 @@ use
 /// * `` –
 fn            startAllServices
 (
-  procrastinator:                       Arc < Procrastinator  >,
+  procrastinator:                       Procrastinator,
 )
 ->  Result
     <
@@ -53,11 +64,31 @@ fn            startAllServices
       Error,
     >
 {
+  let     webInterface
+  =   Arc::new
+      (
+        WebInterface
+        (
+          procrastinator
+            .registerTask
+            (
+              "Test".to_owned(),
+              "Test Task".to_owned(),
+              UserID  ( 0 ),
+            )
+            .registerTask
+            (
+              "Foo".to_owned(),
+              "Foo Bar".to_owned(),
+              UserID  ( 0 ),
+            ),
+        ),
+      );
   let     webServerAlpha
   =   task::spawn
       (
         {
-          http::server
+          http_async::server
           (
             SocketAddr::from
             (
@@ -66,7 +97,7 @@ fn            startAllServices
                 8080,
               )
             ),
-            procrastinator.clone(),
+            webInterface.clone(),
             Arc::new  ( &web::handleHTTPrequest  )
           )
         }
@@ -75,7 +106,7 @@ fn            startAllServices
   =   task::spawn
       (
         {
-          http::server
+          http_async::server
           (
             SocketAddr::from
             (
@@ -84,7 +115,7 @@ fn            startAllServices
                 8000,
               )
             ),
-            procrastinator,
+            webInterface,
             Arc::new  ( &web::handleHTTPrequest  )
           )
         }
@@ -117,10 +148,7 @@ fn main ()
     Ok  ( procrastinator  )
     =>  startAllServices
         (
-          Arc::new
-          (
-            procrastinator,
-          ),
+          procrastinator,
         ),
     Err ( error )
     =>  Err ( error ),
