@@ -123,7 +123,8 @@ macro_rules!  includeAsset
 /// Handle Hypter Text Transfer Protocol Requests.
 ///
 /// # Arguments
-/// * `request`                         – the actual request.
+/// * `request`                         – the actual request,
+/// * `interface`                       – interface configuration.
 pub fn        handleHTTPrequest
 (
   request:                              Request,

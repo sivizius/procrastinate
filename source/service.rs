@@ -30,7 +30,15 @@ use
     {
       Arc,
     },
-    task,
+    task::
+    {
+      block_on,
+      spawn,
+    },
+  },
+  futures::
+  {
+    join,
   },
   procrastinator::
   {
@@ -46,14 +54,85 @@ use
   },
   web::
   {
+    handleHTTPrequest,
     WebInterface,
   },
 };
 
-/// Start all services.
+/// Constructs a `WebInterface` for `Procrastinator`.
+///
+/// # Arguments
+/// * `procrastinator`                  – instance of `Procrastinator` that will be used by the services.
+fn            procrastinatorWebInterface
+(
+  procrastinator:                       Procrastinator,
+)
+->  Arc < WebInterface  >
+{
+  Arc::new
+  (
+    WebInterface
+    (
+      procrastinator
+        .registerTask
+        (
+          "Test".to_owned(),
+          "Test Task".to_owned(),
+          UserID  ( 0 ),
+        )
+        .registerTask
+        (
+          "Foo".to_owned(),
+          "Foo Bar".to_owned(),
+          UserID  ( 0 ),
+        ),
+    ),
+  )
+}
+
+/// Starts a `http_async::server` for `Procrastinator`.
 ///
 /// # Arguments
 /// * `` –
+fn            procrastinatorWebServer
+(
+  address:                              [ u8; 4 ],
+  port:                                 u16,
+  webInterface:                         &Arc < WebInterface  >,
+)
+->  async_std::task::JoinHandle
+    <
+      Result
+      <
+        (),
+        Error,
+      >
+    >
+{
+  //let     handleHTTPrequest             =   &handleHTTPrequest.clone  ( );
+  spawn
+  (
+    {
+      http_async::server
+      (
+        SocketAddr::from
+        (
+          (
+            address,
+            port,
+          )
+        ),
+        webInterface.clone(),
+        Arc::new  ( &handleHTTPrequest )
+      )
+    }
+  )
+}
+
+/// Start all services.
+///
+/// # Arguments
+/// * `procrastinator`                  – instance of `Procrastinator` that will be used by the services.
 fn            startAllServices
 (
   procrastinator:                       Procrastinator,
@@ -64,74 +143,44 @@ fn            startAllServices
       Error,
     >
 {
-  let     webInterface
-  =   Arc::new
-      (
-        WebInterface
-        (
-          procrastinator
-            .registerTask
-            (
-              "Test".to_owned(),
-              "Test Task".to_owned(),
-              UserID  ( 0 ),
-            )
-            .registerTask
-            (
-              "Foo".to_owned(),
-              "Foo Bar".to_owned(),
-              UserID  ( 0 ),
-            ),
-        ),
-      );
+  let     webInterface                  =   procrastinatorWebInterface  ( procrastinator  );
   let     webServerAlpha
-  =   task::spawn
+  =   procrastinatorWebServer
       (
-        {
-          http_async::server
-          (
-            SocketAddr::from
-            (
-              (
-                [ 127,  0,  0,  1 ],
-                8080,
-              )
-            ),
-            webInterface.clone(),
-            Arc::new  ( &web::handleHTTPrequest  )
-          )
-        }
+        [ 127,  0,  0,  1 ],
+        8080,
+        &webInterface
       );
-  let     webServerBeta
-  =   task::spawn
+  /*let     webServerBeta
+  =   procrastinatorWebServer
       (
-        {
-          http_async::server
-          (
-            SocketAddr::from
-            (
-              (
-                [ 127,  0,  0,  1 ],
-                8000,
-              )
-            ),
-            webInterface,
-            Arc::new  ( &web::handleHTTPrequest  )
-          )
-        }
-      );
-  println!
+        [ 127,  0,  0,  1 ],
+        8000,
+        &webInterface
+      );*/
+  let
   (
-    "
-      Services:
-        Alpha:  {}
-        Beta:   {}
-    ",
-    webServerAlpha.task().id(),
-    webServerBeta.task().id(),
-  );
-  task::block_on(webServerAlpha)?;
-  task::block_on(webServerBeta)?;
+    alpha,
+    beta,
+  )
+  =   block_on
+      (
+        async
+        {
+          join!
+          (
+            webServerAlpha,
+            procrastinatorWebServer
+            (
+              [ 127,  0,  0,  1 ],
+              8000,
+              &webInterface
+            ),
+          )
+        }
+      );
+  alpha?;
+  beta?;
   Ok(())
 }
 
@@ -145,12 +194,7 @@ fn main ()
 {
   match loadProcrastinatorConfigFromFile  ( "build/procrastinator.ron"  )
   {
-    Ok  ( procrastinator  )
-    =>  startAllServices
-        (
-          procrastinator,
-        ),
-    Err ( error )
-    =>  Err ( error ),
+    Ok  ( procrastinator  )             =>  startAllServices  ( procrastinator  ),
+    Err ( error )                       =>  Err               ( error           ),
   }
 }

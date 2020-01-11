@@ -29,7 +29,7 @@ use
   },
 };
 
-/// …
+/// Build 404 Page.
 ///
 /// # Arguments
 /// * `request`                         – the actual request,

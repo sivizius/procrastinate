@@ -33,7 +33,7 @@ use
   },
 };
 
-/// Return Calendar Page.
+/// Build Calendar Page.
 ///
 /// # Arguments
 /// * `request`                         – the actual request,

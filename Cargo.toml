@@ -11,7 +11,8 @@ repository                              =   "https://github.com/sivizius/procras
 
 [dependencies]
 async-std                               =   "1.4"
-http-async                              =   "0.1"
+futures                                 =   "0.3"
+http-async                              =   { version = "0.1",  path  = "http-async" }
 ron                                     =   "0.5"
 serde                                   =   "1.0"
 serde_json                              =   "1.0"
